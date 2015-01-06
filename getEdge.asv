@@ -1,0 +1,9 @@
+function result = getEdge(image)
+n = 5;
+[height, width] = size(image);
+tmp = double(zeros(height, width));
+
+for i = 1 : n
+   core[i] = strel('diamond', i);
+end
+
