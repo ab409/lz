@@ -9,7 +9,7 @@ key1 = (minPixel + maxPixel) / 2;
 
 key2 = getNextKey(image, key1);
 count = 0;
-while abs(key1 - key2) < 1
+while abs(key1 - key2) > 1
    count = count + 1
    key1 = key2;
    key2 = getNextKey(image, key2);

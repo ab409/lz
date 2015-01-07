@@ -1,4 +1,4 @@
-function [newImage, fixedUpLine, fixedDownLine] = getExactlyBorderImage(image)
+function [newImage, fixedImage, fixedUpLine, fixedDownLine] = getExactlyBorderImage(image)
 
 [height, width] = size(image);
 newImage = zeros(height, width);
@@ -36,5 +36,17 @@ for i = 1 : width
    end
    newImage(:, i) = line;
 end
+fixedImage = zeros(height, width);
+for i = 1: width
+   fixedLine = image(:, i);
+   if fixedUpLine(i) > 1
+      fixedLine(1: fixedUpLine(i)) = 0;
+   end
+   if fixedDownLine(i) < height
+      fixedLine(fixedDownLine(i) : height) = 0; 
+   end
+   fixedImage(:, i) = fixedLine;
+end
 
 newImage = uint8(newImage);
+fixedImage = uint8(fixedImage);

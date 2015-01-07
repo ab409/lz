@@ -46,29 +46,21 @@ splineSmoothImage = getSplineSmoothImage(histeqImage);
 % showImage(splineSmoothImage);
 % showPixelLine(splineSmoothImage, 550);
 % [exactlyUp, exactlyDown]=getExactlyUpDownBorder(splineSmoothImage(:, 550));
-[newImage, fixedUpLine, fixedDownLine] = getExactlyBorderImage(splineSmoothImage);
+[newImage, fixedImage, fixedUpLine, fixedDownLine] = getExactlyBorderImage(splineSmoothImage);
 [height, width] = size(grayImage);
 x = 1:width;
 x = x';
+% showImage(newImage);
+% showImage(fixedImage);
 %%
 %剪影
-subBackImage = subBackground(splineSmoothImage);
-%%
-%形态学提取边缘
-edgeImage = getEdge(subBackImage);
-%%
-%阈值分割
-segImage = segment(edgeImage);
-%%
-%提取缺陷边缘
-% finalImage = getOutEdge(segImage);
-% showImage(finalImage);
-
-fixBoardImage = fixBoard(segImage);
-dilateImage = dilateImage(fixBoardImage);
-
-
-
+subBackImage = subBackground(fixedImage);
+subBackSmoothImage = getSplineSmoothImage(subBackImage);
+showImage(subBackSmoothImage);
+%获取极值点
+% showExtremePoint(subBackSmoothImage, 371);
+defectImage = getDefectImage(subBackSmoothImage);
+showImage(defectImage);
 
 
 
