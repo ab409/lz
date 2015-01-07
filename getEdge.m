@@ -17,7 +17,7 @@ n = 5;
 % result = uint8(tmp / (n - 1));
 %%
 %version 2
-% core = strel('diamond', 3);
+% core = strel('diamond', 5);
 % 
 % result = getEdgeCore(core, image);
 %%

@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %∂¡Õº
-grayImage = readSourceFile('source5.bmp');
+grayImage = readSourceFile('source10.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
@@ -63,6 +63,9 @@ segImage = segment(edgeImage);
 %Ã·»°»±œ›±ﬂ‘µ
 % finalImage = getOutEdge(segImage);
 % showImage(finalImage);
+
+fixBoardImage = fixBoard(segImage);
+
 
 
 
