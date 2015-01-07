@@ -25,7 +25,7 @@ backVal = 0.0;
 targetVal = 0.0;
 backCount = 0;
 targetCount = 0;
-for i = 1 : height 
+for i = 1 : height
    for j = 1 : width
       if image(i, j) < key
          backVal = backVal + image(i, j);
