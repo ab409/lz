@@ -1,0 +1,14 @@
+function result = segment(image)
+
+[height, width] = size(image);
+tmp = image;
+minPixel = min(tmp);
+maxPixel = max(tmp);
+key1 = (minPixel + maxPixel) / 2;
+
+key2 = getNextKey(image, key1);
+int count = 0;
+while key1 ~= key2
+   key1 = key2;
+   key2 = getNextKey(image, key2);
+end
