@@ -37,6 +37,7 @@ else
       minValue = min(yIndex(:, 2:width-1));
       minIndex = 2;
       maxLeftIndex = 2;
+      %
       maxRightIndex = 2;
       for i = 2 : width - 1
          if yIndex(i) == minValue
@@ -45,8 +46,7 @@ else
          end
       end
       
-      maxLeft = max(yIndex(:, 2:minIndex));
-      
+      maxLeft = max(yIndex(:, 2:minIndex));      
       for i = 2 : minIndex
          if yIndex(i) == maxLeft
              maxLeftIndex = i;
@@ -61,7 +61,7 @@ else
              break;
          end
       end
-      up = xIndex(maxLeftIndex)
-      down = xIndex(maxRightIndex)
+      up = xIndex(maxLeftIndex);
+      down = xIndex(maxRightIndex);
 end
 

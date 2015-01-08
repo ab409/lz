@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %∂¡Õº
-grayImage = readSourceFile('source5.bmp');
+grayImage = readSourceFile('source4.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
@@ -61,7 +61,7 @@ showImage(subBackSmoothImage);
 % showExtremePoint(subBackSmoothImage, 371);
 defectImage = getDefectImage(subBackSmoothImage);
 
-erodeDefect = erodeImage(defectImage, 1);
+
 
 showImage(defectImage);
 

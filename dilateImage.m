@@ -1,4 +1,4 @@
-function result = dilateImage(image)
+function result = dilateImage(image, size)
 
-se = strel('disk', 1);
+se = strel('disk', size);
 result = imdilate(image, se);
