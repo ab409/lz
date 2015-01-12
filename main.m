@@ -63,7 +63,11 @@ defectImage = getDefectImage(subBackSmoothImage);
 
 erodeDefect = erodeImage(defectImage, 1);
 
-showImage(defectImage);
+% showImage(defectImage);
+
+[lengths, twoValImg, startIndexs] = getDefectCount(erodeDefect);
+
+
 
 
 
