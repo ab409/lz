@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %读图
-grayImage = readSourceFile('source5.bmp');
+grayImage = readSourceFile('source7.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
@@ -38,7 +38,7 @@ sourceROI = grayImage(upBorder : downBorder, :);
 [fixedImage,a,b] = waveDenoise(sourceROI);
 % fixedImage = sym4(sourceROI);
 histeqImage = fixedImage;%%只为测试，没有用直方图均衡后的图像
-% showImage(histeqImage);
+ showImage(histeqImage);
 % [x,y] = showPixelLine(histeqImage, 550);
 % [a, b, yData] = createFit(x, y);
 

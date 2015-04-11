@@ -6,4 +6,6 @@ x = 1 : height;
 y = image(:, column)';
 y = double(y);
 figure;
-plot(x, y);
+plot(x, y,'b','LineWidth',1.5);
+xlabel('像素点位置X');
+ylabel('灰度值');
