@@ -1,5 +1,5 @@
 function result = getEdge(image)
-n = 5;
+n = 3;
 [height, width] = size(image);
 %%
 %version 1

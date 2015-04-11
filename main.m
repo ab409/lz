@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %∂¡Õº
-grayImage = readSourceFile('source4.bmp');
+grayImage = readSourceFile('source7.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
