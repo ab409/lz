@@ -38,7 +38,7 @@ sourceROI = grayImage(upBorder : downBorder, :);
 [fixedImage,a,b] = waveDenoise(sourceROI);
 % fixedImage = sym4(sourceROI);
 histeqImage = fixedImage;%%只为测试，没有用直方图均衡后的图像
- showImage(histeqImage);
+% showImage(histeqImage);
 % [x,y] = showPixelLine(histeqImage, 550);
 % [a, b, yData] = createFit(x, y);
 
@@ -53,18 +53,22 @@ x = x';
 % showImage(newImage);
 % showImage(fixedImage);
 %%
-%剪影
-subBackImage = subBackground(fixedImage);
-subBackSmoothImage = getSplineSmoothImage(subBackImage);
-showImage(subBackSmoothImage);
-%获取极值点
-% showExtremePoint(subBackSmoothImage, 371);
-defectImage = getDefectImage(subBackSmoothImage);
+% 次部分单个%表示本次注释，两个%表示之前的注释
+% %剪影
+% subBackImage = subBackground(fixedImage);
+% subBackSmoothImage = getSplineSmoothImage(subBackImage);
+% showImage(subBackSmoothImage);
+% %获取极值点
+% % showExtremePoint(subBackSmoothImage, 371);
+% defectImage = getDefectImage(subBackSmoothImage);
+% 
+% erodeDefect = erodeImage(defectImage, 1);
+% 
+% showImage(defectImage);
+%% iac
 
-erodeDefect = erodeImage(defectImage, 1);
-
-showImage(defectImage);
-
+MarkRoi = fastIac(fixedImage);
+getIacResult(fixedImage, MarkRoi);
 
 
 

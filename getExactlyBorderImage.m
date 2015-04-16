@@ -39,10 +39,10 @@ end
 fixedImage = zeros(height, width);
 for i = 1: width
    fixedLine = image(:, i);
-   if fixedUpLine(i) > 1
+   if fixedUpLine(i) >= 1
       fixedLine(1: fixedUpLine(i)) = 0;
    end
-   if fixedDownLine(i) < height
+   if fixedDownLine(i) <= height
       fixedLine(fixedDownLine(i) : height) = 0; 
    end
    fixedImage(:, i) = fixedLine;

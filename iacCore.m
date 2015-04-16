@@ -1,22 +1,30 @@
-function result = testIAC(image)
+function result = iacCore(vector, image)
+%% 
+% iac 矢量图像算法核心
+[nrow, ncol, count] = size(vector);
 
 k=5;
-im=image;
-im(:,1)=im(:,4);im(:,2)=im(:,4);im(:,3)=im(:,4);
-im(1,:)=im(4,:);im(2,:)=im(4,:);im(3,:)=im(4,:);
-im=double(im);
-im(:,1:3)=im(:,4:6);
-%im = imresize( im,0.5);
-[nrow,ncol]=size(im); 
-%J= gauss( im,3,2);                                               
-J = im;
-J_x = (J(:,[2:ncol ncol])-J(:,[1 1:ncol-1]))/2; 
-J_y = (J([2:nrow nrow],:)-J([1 1:nrow-1],:))/2;       
-grad_im = (J_x.^2 + J_y.^2).^0.5; 
+J_x = double(zeros(nrow, ncol));
+J_y = double(zeros(nrow, ncol));
+for i = 1 : count
+   im = vector(:, :, i); 
+   im(:,1)=im(:,4);im(:,2)=im(:,4);im(:,3)=im(:,4);
+   im(1,:)=im(4,:);im(2,:)=im(4,:);im(3,:)=im(4,:);
+   im=double(im);
+   im(:,1:3)=im(:,4:6);
+   J = im;
+   J_x = J_x + (J(:,[2:ncol ncol])-J(:,[1 1:ncol-1]))/2;
+   J_y = J_y + (J([2:nrow nrow],:)-J([1 1:nrow-1],:))/2;       
+end
+
+J_x = J_x ./ count;
+J_y = J_y ./ count;
+
+grad_im = (J_x.^2 + J_y.^2); 
 kk=100;                                    
-g=1./(1+(grad_im/kk).^2);                 %边缘函数
-delta_t=10;                               %选定迭代步长 
-c=10;                                   %选定常数速度
+g=1./(1+(grad_im./kk));                 %边缘函数
+delta_t=0.01;                               %选定迭代步长 
+c=0.004;                                   %选定常数速度
 epsilon=0.5;                             % Heaviside函数参数设置
 u = zeros(nrow,ncol);                     %初始u为正方形
   p=1; 
@@ -31,15 +39,20 @@ u = zeros(nrow,ncol);                     %初始u为正方形
         end 
      end 
    end 
-figure(1);
-imshow(uint8(im)); 
-hold on;
-[c1,h]=contour(u,[0 0 ],'r');
-hold off                     %将当前曲线迭加到原图像中
-for n=1:100
+% figure(1);
+% imshow(uint8(im)); 
+% hold on;
+% [c1,h]=contour(u,[0 0 ],'r');
+% hold off                     %将当前曲线迭加到原图像中
+c1 = zeros(count);
+c2 = zeros(count);
+for n=1:2000
     H_u = 0.5*(1+(2/pi)*atan(u/epsilon)); %计算正则化的Heavside函数
-    c1=sum(sum(H_u.*im))/sum(sum(H_u)); % 由当前u计算参数c1和c2
-    c2=sum(sum((1-H_u).*im))/sum(sum(1-H_u));
+    for i = 1 : count
+        im = vector(:, :, i);
+        c1(i)=sum(sum(H_u.*im))/sum(sum(H_u)); % 由当前u计算参数c1和c2
+        c2(i)=sum(sum((1-H_u).*im))/sum(sum(1-H_u));
+    end
    
    
    u_x_e = u(:,[2:ncol,ncol])-u; 
@@ -69,11 +82,25 @@ for n=1:100
    delta_H = (1/pi)*epsilon./(epsilon^2+u.^2);
    divgn = Term_e - Term_w + Term_s - Term_n;  
    term = divgn+c*g; 
-   u=u+delta_t*delta_H.*(100*term+1*(im-c2).^2-1*(im-c1).^2);
+   %%
+   %此部分为补充
+   gamma1 = 0.01;
+   gamma2 = 0.01;
+   c1_vector = zeros(nrow, ncol);
+   c2_vector = zeros(nrow, ncol);
+   for i = 1 : count
+       im = vector(:, :, i);
+       c1_vector = c1_vector + (im - c1(i)).^2 * gamma1;
+       c2_vector = c2_vector + (im - c2(i)).^2 * gamma2;
+   end
+   c1_vector = c1_vector / count;
+   c2_vector = c2_vector / count;
+   %%
+   u=u+delta_t*delta_H.*(100*term+c2_vector-c1_vector);
    
    if mod(n,40)==0    
      figure(k);
-     imshow(uint8(im)),colormap gray
+     imshow(uint8(image)),colormap gray
      iterNum=[num2str(n), ' iterations'];        
      title(iterNum);
      hold on;
@@ -81,5 +108,4 @@ for n=1:100
      hold off
    end 
 end
-
 result = u;
