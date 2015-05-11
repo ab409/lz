@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %∂¡Õº
-grayImage = readSourceFile('source7.bmp');
+grayImage = readSourceFile('source10.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
@@ -68,7 +68,15 @@ x = x';
 %% iac
 
 MarkRoi = fastIac(fixedImage);
-getIacResult(fixedImage, MarkRoi);
+iacResult = getIacResult(fixedImage, MarkRoi);
+%%
+%Ã·»°ÕºœÒÃÿ’˜
+props = getRegionProps(iacResult, fixedImage);
+
+
+
+
+
 
 
 
