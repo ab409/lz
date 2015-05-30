@@ -1,17 +1,16 @@
 function showResult()
 
-sourceImage = imread('qikong.jpg');
+sourceImage = imread('qikong3.jpg');
 grayImage = rgb2gray(sourceImage);
 
-grayImage = imresize(grayImage, 0.3);
+ grayImage = imresize(grayImage, 0.5);
 
-subBackImage = subBackground(grayImage);
+[fixedImage,a,b] = waveDenoise(grayImage);
+
+% subBackImage = subBackground(fixedImage);
+subBackImage = fixedImage;
 % subBackSmoothImage = getSplineSmoothImage(subBackImage);
 showImage(subBackImage);
-%获取极值点
-% showExtremePoint(subBackSmoothImage, 371);
-defectImage = getDefectImage(subBackImage);
 
-erodeDefect = erodeImage(defectImage, 1);
-
-showImage(defectImage);
+MarkRoi = fastIac(subBackImage);
+iacResult = getIacResult(subBackImage, MarkRoi);

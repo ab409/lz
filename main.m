@@ -7,7 +7,7 @@ grayScale = 256;
 
 %%
 %读图
-grayImage = readSourceFile('source10.bmp');
+grayImage = readSourceFile('source7.bmp');
 % imwrite(grayImage, 'grayImage.bmp', 'bmp');
 % showImage(grayImage);
 % grayImage = sym4(grayImage);
@@ -19,7 +19,7 @@ smoothImage = smooth(grayImage, 15);
 
 %%
 %初步确定焊缝上下边界
-[upBorder, downBorder] = getUpDownBorder(smoothImage);
+[upBorder, downBorder] = getUpDownBorder(smoothImage)
 % region = smoothImage(upBorder : downBorder, :);
 
 sourceROI = grayImage(upBorder : downBorder, :);
