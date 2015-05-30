@@ -130,6 +130,7 @@ function weldLocateBtn_Callback(hObject, eventdata, handles)
 global im;
 global smoothImage;
 global fixedImage;
+global splineSmoothImage;
 [upBorder, downBorder] = getUpDownBorder(smoothImage)
 sourceROI = im(upBorder : downBorder, :);
 [fixedImage,a,b] = waveDenoise(sourceROI);
@@ -161,6 +162,24 @@ function xtxBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to xtxBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global splineSmoothImage;
+%%
+%剪影
+subBackImage = subBackground(splineSmoothImage);
+%%
+%形态学提取边缘
+edgeImage = getEdge(subBackImage);
+%%
+%阈值分割
+segImage = segment(edgeImage);
+%%
+%提取缺陷边缘
+% finalImage = getOutEdge(segImage);
+% showImage(finalImage);
+
+fixBoardImage = fixBoard(segImage);
+dilate = dilateImage(fixBoardImage);
+imshow(dilate);
 
 
 % --- Executes on button press in iacBtn.
