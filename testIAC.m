@@ -75,7 +75,7 @@ for n=1:100
      figure(k);
      imshow(uint8(im)),colormap gray
      iterNum=[num2str(n), ' iterations'];        
-     title(iterNum);
+%      title(iterNum);
      hold on;
      [c0,h] = contour(u,[0 0],'r');
      hold off

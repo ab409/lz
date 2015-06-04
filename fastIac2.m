@@ -1,4 +1,4 @@
-function result = fastIac(source)
+function result = fastIac2(source, deltaT, cg, times, gamma1, gamma2, miu)
 
 [height, width] = size(source);
 %source = double(source);
@@ -34,7 +34,7 @@ while startX < width
     if endX > width
         endX = width;
     end  
-    midU = testIAC(subBackImage(:, startX : endX));   
+    midU = testIAC2(subBackImage(:, startX : endX), deltaT, cg, times, gamma1, gamma2, miu);   
     if startX == 1 || endX == width
         u(:, startX : endX) = midU;
     else

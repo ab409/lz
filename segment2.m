@@ -1,4 +1,4 @@
-function result = segment(image)
+function result = segment2(image)
 
 [height, width] = size(image);
 result = zeros(height, width);

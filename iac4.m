@@ -1,4 +1,4 @@
-function iac(im)
+function result = iac4(im, deltaT, cg, times, gamma1, gamma2, miu)
 
 level = graythresh(im);
 BW = im2bw(im,level);
@@ -21,9 +21,9 @@ J_y = (J([2:nrow nrow],:)-J([1 1:nrow-1],:))/2;
 grad_im = (J_x.^2 + J_y.^2).^0.5; 
 kk=10;                                     %kk为下降速率                        
 g=1./(1+(grad_im/kk).^2);                 %边缘函数
-delta_t=0.1;                              %选定迭代步长 
-c=0.4;                                   %选定常数速度 10论文中
-epsilon=1.0;                             % Heaviside函数参数设置
+delta_t=deltaT;                              %选定迭代步长 
+c=cg;                                   %选定常数速度 10论文中
+epsilon=miu;                             % Heaviside函数参数设置
 u = zeros(nrow,ncol);                     %初始u为正方形
   p=1; 
    for i=1:nrow 
@@ -37,15 +37,13 @@ u = zeros(nrow,ncol);                     %初始u为正方形
         end 
      end 
    end 
-figure(1);
-imshow(uint8(im)); 
+
 hold on;
 [c1,h]=contour(u,[0 0 ],'r');
 hold off                     %将当前曲线迭加到原图像中
 mju = 1; %%相对参数
-gamma1 = 1; %gamma1
-gamma2 = 1; %gamma2
-for n=1:400
+
+for n=1:times
     H_u = 0.5*(1+(2/pi)*atan(u/epsilon)); %计算正则化的Heavside函数
     c1=sum(sum(H_u.*im))/sum(sum(H_u)); % 由当前u计算参数c1和c2
     c2=sum(sum((1-H_u).*im))/sum(sum(1-H_u));
@@ -80,13 +78,14 @@ for n=1:400
    term = divgn+c*g; 
    u=u+delta_t*delta_H.*(mju*term+gamma1*(im-c2).^2-gamma2*(im-c1).^2);
    
-   if mod(n,40)==0    
-     figure(k);
-     imshow(uint8(im)),colormap gray
-     iterNum=[num2str(n), ' iterations'];        
-%      title(iterNum);
-     hold on;
-     [c0,h] = contour(u,[0 0],'r');
-     hold off
-   end 
+%    if mod(n,40)==0    
+%      figure(k);
+%      imshow(uint8(im)),colormap gray
+%      iterNum=[num2str(n), ' iterations'];        
+% %      title(iterNum);
+%      hold on;
+%      [c0,h] = contour(u,[0 0],'r');
+%      hold off
+%    end 
 end
+result = u;

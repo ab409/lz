@@ -22,7 +22,7 @@ function varargout = weld_defect_rec(varargin)
 
 % Edit the above text to modify the response to help weld_defect_rec
 
-% Last Modified by GUIDE v2.5 22-May-2015 15:39:48
+% Last Modified by GUIDE v2.5 01-Jun-2015 17:17:17
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -89,13 +89,13 @@ function proProcessBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 global im;
 global smoothImage;
-coreSize = str2num(get(handles.coreSize, 'String'));
+csize = str2num(get(handles.coreSize, 'String'));
+% coreSize = 15;
 
-if get(handles.rgb2gray, 'Value')
-   im = rgb2gray(im); 
-end
-
-smoothImage = smooth(im, coreSize);
+% if get(handles.rgb2gray, 'Value')
+%    im = rgb2gray(im); 
+% end
+smoothImage = smooth(im, csize);
 figure;
 imshow(smoothImage);
 
@@ -131,12 +131,18 @@ global im;
 global smoothImage;
 global fixedImage;
 global splineSmoothImage;
-[upBorder, downBorder] = getUpDownBorder(smoothImage)
+global pre;
+
+coreHeight = str2num(get(handles.cHeight, 'String'));
+interval = str2num(get(handles.interval, 'String'));
+
+[upBorder, downBorder] = getBorder(smoothImage, coreHeight, interval)
 sourceROI = im(upBorder : downBorder, :);
 [fixedImage,a,b] = waveDenoise(sourceROI);
 histeqImage = fixedImage;
 splineSmoothImage = getSplineSmoothImage(histeqImage);
 [newImage, fixedImage, fixedUpLine, fixedDownLine] = getExactlyBorderImage(splineSmoothImage);
+pre = 1;
 figure;
 imshow(newImage);
 
@@ -148,10 +154,22 @@ function inputBtn_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 global im;
+global smoothImage;
+global fixedImage;
+global splineSmoothImage;
+global pre;
+pre = 0;
 [Filename, Pathname] = uigetfile({ '*.bmp';'*.jpg'},'选择输入文件');
 str = [Pathname Filename];
 if (Filename ~= 0 )
     im = imread(str);
+    mysize = size(im);
+    if numel(mysize) > 2
+       im = rgb2gray(im); 
+    end
+    smoothImage = im;
+    fixedImage = im;
+    splineSmoothImage = im;
     figure;
     imshow(im);
 end
@@ -165,20 +183,23 @@ function xtxBtn_Callback(hObject, eventdata, handles)
 global splineSmoothImage;
 %%
 %剪影
-subBackImage = subBackground(splineSmoothImage);
+subBackImage = subBackground2(splineSmoothImage);
 %%
 %形态学提取边缘
-edgeImage = getEdge(subBackImage);
+n = str2num(get(handles.strelTimes, 'String'));
+size = str2num(get(handles.strelSize, 'String'));
+edgeImage = getEdge3(subBackImage, n);
 %%
 %阈值分割
-segImage = segment(edgeImage);
+segImage = segment2(edgeImage);
 %%
 %提取缺陷边缘
 % finalImage = getOutEdge(segImage);
 % showImage(finalImage);
 
-fixBoardImage = fixBoard(segImage);
-dilate = dilateImage(fixBoardImage);
+fixBoardImage = fixBoard2(segImage);
+dilate = dilateImage3(fixBoardImage, size);
+figure;
 imshow(dilate);
 
 
@@ -187,7 +208,24 @@ function iacBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to iacBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+global fixedImage;
+global pre;
+global im;
 
+dt = str2num(get(handles.deltaT, 'String'));
+cg = str2num(get(handles.c, 'String'));
+t = str2num(get(handles.times, 'String'));
+g1 = str2num(get(handles.gamma1, 'String'));
+g2 = str2num(get(handles.gamma2, 'String'));
+ms = str2num(get(handles.miu, 'String'));
+if pre == 1
+    iacResult = fastIac2(fixedImage, dt, cg, t, g1, g2, ms);
+    showCon(fixedImage, fixedImage, iacResult);
+else
+    iacResult = iac3(im, dt, cg, t, g1, g2, ms); 
+    result4 = iac4(im, dt, cg, t, g1, g2, ms);
+    showCon(fixedImage, fixedImage, result4);
+end
 
 % --- Executes on button press in BeamletBtn.
 function BeamletBtn_Callback(hObject, eventdata, handles)
@@ -196,12 +234,12 @@ function BeamletBtn_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 
-% --- Executes on button press in pushbutton7.
-function pushbutton7_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbutton7 (see GCBO)
+% --- Executes on button press in bpBtn.
+function bpBtn_Callback(hObject, eventdata, handles)
+% hObject    handle to bpBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
+bp();
 
 % --- Executes on button press in pushbutton8.
 function pushbutton8_Callback(hObject, eventdata, handles)
@@ -211,18 +249,18 @@ function pushbutton8_Callback(hObject, eventdata, handles)
 
 
 
-function edit2_Callback(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function cHeight_Callback(hObject, eventdata, handles)
+% hObject    handle to cHeight (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit2 as text
-%        str2double(get(hObject,'String')) returns contents of edit2 as a double
+% Hints: get(hObject,'String') returns contents of cHeight as text
+%        str2double(get(hObject,'String')) returns contents of cHeight as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit2_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit2 (see GCBO)
+function cHeight_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to cHeight (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -234,18 +272,202 @@ end
 
 
 
-function edit3_Callback(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function interval_Callback(hObject, eventdata, handles)
+% hObject    handle to interval (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit3 as text
-%        str2double(get(hObject,'String')) returns contents of edit3 as a double
+% Hints: get(hObject,'String') returns contents of interval as text
+%        str2double(get(hObject,'String')) returns contents of interval as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit3_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit3 (see GCBO)
+function interval_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to interval (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function strelSize_Callback(hObject, eventdata, handles)
+% hObject    handle to strelSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of strelSize as text
+%        str2double(get(hObject,'String')) returns contents of strelSize as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function strelSize_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to strelSize (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function strelTimes_Callback(hObject, eventdata, handles)
+% hObject    handle to strelTimes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of strelTimes as text
+%        str2double(get(hObject,'String')) returns contents of strelTimes as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function strelTimes_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to strelTimes (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function deltaT_Callback(hObject, eventdata, handles)
+% hObject    handle to deltaT (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of deltaT as text
+%        str2double(get(hObject,'String')) returns contents of deltaT as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function deltaT_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to deltaT (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function c_Callback(hObject, eventdata, handles)
+% hObject    handle to c (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of c as text
+%        str2double(get(hObject,'String')) returns contents of c as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function c_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to c (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function times_Callback(hObject, eventdata, handles)
+% hObject    handle to times (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of times as text
+%        str2double(get(hObject,'String')) returns contents of times as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function times_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to times (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function gamma1_Callback(hObject, eventdata, handles)
+% hObject    handle to gamma1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gamma1 as text
+%        str2double(get(hObject,'String')) returns contents of gamma1 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gamma1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gamma1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function gamma2_Callback(hObject, eventdata, handles)
+% hObject    handle to gamma2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of gamma2 as text
+%        str2double(get(hObject,'String')) returns contents of gamma2 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function gamma2_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to gamma2 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function miu_Callback(hObject, eventdata, handles)
+% hObject    handle to miu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of miu as text
+%        str2double(get(hObject,'String')) returns contents of miu as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function miu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to miu (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

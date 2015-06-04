@@ -1,5 +1,4 @@
-function result = getEdge(image)
-n = 3;
+function result = getEdge3(image, n)
 [height, width] = size(image);
 %%
 %version 1
